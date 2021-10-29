@@ -3,11 +3,11 @@ import httpx
 bot = CQHttp()
 #配置小米推送
 MiPush = True #是否开启小米推送，True为是，False为否
-alias = "ktIV8HjgEvOeKTj6" #请在括号内填入别名
+alias = "0000" #请在括号内填入别名
 
 #配置FCM推送
 FCM = True #是否开启FCM推送，True为是，False为否
-key = "k-48dbfef698dd" #请在括号内填入API KEY
+key = "0000" #请在括号内填入API KEY
 
 group_whitelist = {1077550597:'gkd'} #群组白名单
 @bot.on_message('private')
