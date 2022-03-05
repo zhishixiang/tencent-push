@@ -1,15 +1,16 @@
 from aiocqhttp import CQHttp, Event
 import httpx
+import json
 bot = CQHttp()
-#配置小米推送
-MiPush = True #是否开启小米推送，True为是，False为否
-alias = "0000" #请在括号内填入别名
 
-#配置FCM推送
-FCM = True #是否开启FCM推送，True为是，False为否
-key = "0000" #请在括号内填入API KEY
+#读取配置文件
+with open("config.json","r") as f:
+    config = json.load(f)
+MiPush = config[0]["MiPush"]
+FCM = config[0]["FCM"]
+KEY = config[0]["KEY"]
+group_whitelist = config[0]["WhiteList"]
 
-group_whitelist = {1077550597:'gkd'} #群组白名单
 @bot.on_message('private')
 async def _(event: Event):
     msg = event['message']
@@ -28,9 +29,9 @@ async def _(event: Event):
     nickName = event['sender']["nickname"]
     async with httpx.AsyncClient() as client:
         if MiPush == True:
-            await client.post("https://tdtt.top/send",data={'title':'%s'%nickName,'content':'%s'%(msg),'alias':alias})
+            await client.post("https://tdtt.top/send",data={'title':'%s'%nickName,'content':'%s'%(msg),'alias':KEY})
         if FCM == True:
-            await client.post("http://xdroid.net/api/message",data={'t':'%s'%nickName,'c':'%s'%msg,'k':key})
+            await client.post("http://xdroid.net/api/message",data={'t':'%s'%nickName,'c':'%s'%msg,'k':KEY})
 @bot.on_message('group')
 async def _(event: Event):
     groupId = event['group_id']
@@ -56,7 +57,7 @@ async def _(event: Event):
             nickName = nickName['nickname']
         async with httpx.AsyncClient() as client:
             if MiPush == True:
-                await client.post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':alias})
+                await client.post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == True:
-                await client.post("http://xdroid.net/api/message",data={'t':'%s'%groupName,'c':'%s:%s'%(nickName,msg),'k':key})
+                await client.post("http://xdroid.net/api/message",data={'t':'%s'%groupName,'c':'%s:%s'%(nickName,msg),'k':KEY})
 bot.run(host='127.0.0.1', port=8080)
