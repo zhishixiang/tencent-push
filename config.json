@@ -1,1 +1,1 @@
-[{"MiPush":"False"},{"FCM":"False"},{"KEY":"0000"},{"WhiteList":[{"1077550597":"gkd"}]}]
+{"MiPush":"False","FCM":"False","KEY":"0000","WhiteList":{"1077550597":"gkd"}}
