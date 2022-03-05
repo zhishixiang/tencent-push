@@ -6,10 +6,10 @@ bot = CQHttp()
 #读取配置文件
 with open("config.json","r") as f:
     config = json.load(f)
-MiPush = config[0]["MiPush"]
-FCM = config[1]["FCM"]
-KEY = config[2]["KEY"]
-group_whitelist = config[3]["WhiteList"]
+MiPush = config["MiPush"]
+FCM = config["FCM"]
+KEY = config["KEY"]
+group_whitelist = config["WhiteList"]
 
 print("MiPush状态:"+MiPush)
 print("FCM状态:"+FCM)
@@ -65,4 +65,4 @@ async def _(event: Event):
                 await client.post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == True:
                 await client.post("http://xdroid.net/api/message",data={'t':'%s'%groupName,'c':'%s:%s'%(nickName,msg),'k':KEY})
-bot.run(host='127.0.0.1', port=8081)
+bot.run(host='127.0.0.1', port=8080)
