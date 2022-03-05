@@ -3,4 +3,4 @@
 2.加入对微信推送的支持  
 3.预计加入点开通知时拉起聊天的功能  
 4.预计加入通知栏回复功能  
-完整配置教程：https://my.toho.red/archives/35/
+完整配置教程：https://my.toho.red/archives/8/
