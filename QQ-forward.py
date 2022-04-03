@@ -33,9 +33,9 @@ async def _(event: Event):
     print("收到来自%s的私聊消息:%s"%(nickName,msg))
     async with httpx.AsyncClient() as client:
         if MiPush == True:
-            await client.post("https://tdtt.top/send",data={'title':'%s'%nickName,'content':'%s'%(msg),'alias':KEY})
+            await client.post("https://tdtt.top/send",data={'title':nickName,'content':'%s'%(msg),'alias':KEY})
         if FCM == True:
-            await client.post("http://xdroid.net/api/message",data={'t':'%s'%groupName,'c':'%s:%s'%(nickName,msg),'k':KEY})
+            await client.post("https://wirepusher.com/send",data={'id':KEY,'title':nickName,'message':msg,'type':'privateMsg'})
 @bot.on_message('group')
 async def _(event: Event):
     groupId = str(event['group_id'])
@@ -64,5 +64,5 @@ async def _(event: Event):
             if MiPush == True:
                 await client.post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == True:
-                await client.post("http://xdroid.net/api/message",data={'t':'%s'%groupName,'c':'%s:%s'%(nickName,msg),'k':KEY})
+                await client.post("https://wirepusher.com/send",data={'id':'%s'%KEY,'title':groupName,'message':'%s:%s'%(nickName,msg),'type':'groupMsg'})
 bot.run(host='127.0.0.1', port=8080)
