@@ -70,6 +70,7 @@ async def recvMsg():
         nickName = json_data["sender"]["nickname"]
         msg = msgFormat(json_data["message"])
         if groupId in group_whitelist:
+            print("群聊%s的消息:%s:%s"%(groupName,nickName,msg))
             if MiPush == "True":
                 await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == "True":
