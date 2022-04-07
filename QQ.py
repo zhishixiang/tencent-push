@@ -12,7 +12,10 @@ try:
     group_whitelist = config["WhiteList"]
     MiPush = config["MiPush"]
     FCM = config["FCM"]
+    TG = config["TG"]
     KEY = config["KEY"]
+    TG_ID = config["TG_UID"]
+    TG_API = config["TG_PROXY"]
 except:
     print("读取配置文件异常,请检查配置文件是否存在或语法是否有问题")
     assert()
@@ -55,7 +58,7 @@ async def recvMsg():
     json_data = json.loads(data.decode("utf-8"))
     if json_data["post_type"] == "meta_event":
         if json_data["meta_event_type"] == "heartbeat":
-            print("接收心跳信号成功")
+             print("接收心跳信号成功")
     elif json_data["message_type"] == "private":
         nickName = json_data["sender"]["nickname"]
         msg = msgFormat(json_data["message"])
@@ -64,6 +67,11 @@ async def recvMsg():
             await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':nickName,'content':'%s'%(msg),'alias':KEY})
         elif FCM == "True":
             await httpx.AsyncClient().post("https://wirepusher.com/send",data={'id':KEY,'title':nickName,'message':msg,'type':'privateMsg'})
+        elif TG == "True":
+            # https://api.telegram.org/bot（ 这里加上你的token ）/sendMessage?chat_id=66666666&text=
+            text = nickName + ":"+ msg
+            url = 'https://' + TG_API + '/bot' + KEY + '/sendMessage?chat_id=' + TG_ID + '&text=' + text
+            await httpx.AsyncClient().post(url)
     elif json_data["message_type"] == "group":
         groupId = json_data["group_id"]
         groupName = getGroupName(groupId)
@@ -75,13 +83,21 @@ async def recvMsg():
                 await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == "True":
                 await httpx.AsyncClient().post("https://wirepusher.com/send",data={'id':'%s'%KEY,'title':groupName,'message':'%s:%s'%(nickName,msg),'type':'groupMsg'})
+            if TG == "True":
+                text = nickName + "(" + groupName + ")" + ":" + msg
+                url = 'https://' + TG_API + '/bot' + KEY + '/sendMessage?chat_id=' + TG_ID + '&text=' + text
+                await httpx.AsyncClient().post(url)
         elif "[CQ:at,qq=%s]"%userId in msg:
             msg = msg.replace("[CQ:at,qq=%s]"%userId,"[有人@我]")
             print("群聊%s有人@我:%s:%s"%(groupName,nickName,msg))
             if MiPush == "True":
                 await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':'%s'%groupName,'content':'%s:%s'%(nickName,msg),'alias':KEY})
             if FCM == "True":
-                await httpx.AsyncClient().post("https://wirepusher.com/send",data={'id':'%s'%KEY,'title':groupName,'message':'%s:%s'%(nickName,msg),'type':'groupMsg'})            
+                await httpx.AsyncClient().post("https://wirepusher.com/send",data={'id':'%s'%KEY,'title':groupName,'message':'%s:%s'%(nickName,msg),'type':'groupMsg'})
+            if TG == "True":
+                text = nickName + "(" + groupName + ")" + ":" + msg
+                url = 'https://' + TG_API + '/bot' + KEY + '/sendMessage?chat_id=' + TG_ID + '&text=' + text
+                await httpx.AsyncClient().post(url)
     return "200 OK"
 
 if __name__ == '__main__':
