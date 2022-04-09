@@ -53,7 +53,7 @@ def msgFormat(msg):
             else:
                 at = "@" + atimf["data"]["nickname"] + ""
             msg = msg.replace(cqcode, at)
-        else 
+        else:
             msg = msg
     elif "戳一戳" in msg:
         msg = "戳了你一下"
