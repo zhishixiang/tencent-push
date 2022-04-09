@@ -1,5 +1,4 @@
 from email import message
-import json
 from tokenize import group
 from flask import Flask,request,jsonify
 import json
@@ -28,7 +27,9 @@ app = Flask(__name__)
 
 def msgFormat(msg):
     if "CQ:image" in msg:
-        msg = "[图片]"
+        cqcode = re.findall('\[CQ:image.*?]', msg)
+        cqcode = ' '.join(cqcode)
+        msg = msg.replace(cqcode, '[图片]')
     elif "CQ:record" in msg:
         msg = "[语音]"
     elif "CQ:share" in msg:
@@ -39,6 +40,21 @@ def msgFormat(msg):
         msg = "[红包]"
     elif "CQ:forward" in msg:
         msg = "[合并转发]"
+    elif "CQ:at" in msg:
+        if json_data["message_type"] == "group":
+            atid = re.findall('(?<=qq=).*?(?=])', msg)
+            atid = ' '.join(atid)
+            atimfurl = 'http://localhost:5700/get_group_member_info?group_id' + str(groupId) + "?user_id=" + str(atid)
+            atimf = json.loads(requests.get(atimfurl).content)
+            cqcode = re.findall('\[CQ:at.*?]', msg)
+            cqcode = ' '.join(cqcode)
+            if atimf["data"]["card"] != "":
+                at = "@" + atimf["data"]["card"] + ""
+            else:
+                at = "@" + atimf["data"]["nickname"] + ""
+            msg = msg.replace(cqcode, at)
+        else 
+            msg = msg
     elif "戳一戳" in msg:
         msg = "戳了你一下"
     return msg
