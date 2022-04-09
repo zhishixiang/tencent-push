@@ -28,8 +28,8 @@ app = Flask(__name__)
 def msgFormat(msg):
     if "CQ:image" in msg:
         cqcode = re.findall('\[CQ:image.*?]', msg)
-        cqcode = ' '.join(cqcode)
-        msg = msg.replace(cqcode, '[图片]')
+        for code in cqcode:
+            msg = msg.replace(code, '[图片]')
     elif "CQ:record" in msg:
         msg = "[语音]"
     elif "CQ:share" in msg:
@@ -43,16 +43,17 @@ def msgFormat(msg):
     elif "CQ:at" in msg:
         if json_data["message_type"] == "group":
             atid = re.findall('(?<=qq=).*?(?=])', msg)
-            atid = ' '.join(atid)
-            atimfurl = 'http://localhost:5700/get_group_member_info?group_id' + str(groupId) + "?user_id=" + str(atid)
-            atimf = json.loads(requests.get(atimfurl).content)
-            cqcode = re.findall('\[CQ:at.*?]', msg)
-            cqcode = ' '.join(cqcode)
-            if atimf["data"]["card"] != "":
-                at = "@" + atimf["data"]["card"] + ""
-            else:
-                at = "@" + atimf["data"]["nickname"] + ""
-            msg = msg.replace(cqcode, at)
+            for uid in atid:
+                atimfurl = 'http://localhost:5700/get_group_member_info?group_id' + str(groupId) + "?user_id=" + str(uid)
+                imf = json.loads(requests.get(atimfurl).content)
+                regex1 = re.compile(r'\[CQ:at,qq=' + uid + ']')
+                cqcode = regex1.search(msg)
+                cqcode = (cqcode.group())
+                if imf["data"]["card"] != "":
+                    at = "@" + imf["data"]["card"] + " "
+                else:
+                    at = "@" + imf["data"]["nickname"] + " "
+                msg = msg.replace(cqcode, at)
         else:
             msg = msg
     elif "戳一戳" in msg:
