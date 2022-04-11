@@ -41,6 +41,8 @@ def msgFormat(msg):
         msg = "[红包]"
     elif "CQ:forward" in msg:
         msg = "[合并转发]"
+    elif "CQ:video" in msg:
+        msg = "[短视频]"
     elif "CQ:at" in msg:
         if json_data["message_type"] == "group":
             atid = re.findall('(?<=qq=).*?(?=])', msg)
@@ -69,6 +71,7 @@ def getGroupName(groupId):
 
 @app.route("/",methods=['POST'])
 async def recvMsg():
+    global groupId
     data = request.get_data()
     json_data = json.loads(data.decode("utf-8"))
     if json_data["post_type"] == "meta_event":
