@@ -5,6 +5,7 @@ from flask import Flask,request,jsonify
 import json
 import requests
 import httpx
+import re
 
 try:
     with open("config.json","r",encoding = 'UTF-8') as f:
@@ -26,7 +27,8 @@ except:
 
 app = Flask(__name__)
 
-def msgFormat(msg):
+def msgFormat(json_data):
+    msg = json_data["message"]
     if "CQ:image" in msg:
         cqcode = re.findall('\[CQ:image.*?]', msg)
         for code in cqcode:
@@ -88,7 +90,7 @@ async def recvMsg():
 
     elif json_data["message_type"] == "private":
         nickName = json_data["sender"]["nickname"]
-        msg = msgFormat(json_data["message"])
+        msg = msgFormat(json_data)
         print("来自%s的私聊消息:%s"%(nickName,msg))
         if MiPush == "True":
             await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':nickName,'content':msg,'alias':KEY})
@@ -98,7 +100,7 @@ async def recvMsg():
         groupId = json_data["group_id"]
         groupName = getGroupName(groupId)
         nickName = json_data["sender"]["nickname"]
-        msg = msgFormat(json_data["message"])
+        msg = msgFormat(json_data)
         if groupId in group_whitelist:
             print("群聊%s的消息:%s:%s"%(groupName,nickName,msg))
             if MiPush == "True":
