@@ -28,71 +28,70 @@ except:
 
 app = Flask(__name__)
 
-def msgFormat(msg):
-    if "CQ:image" in msg:
-        cqcode = re.findall('\[CQ:image.*?]', msg)
+def msgFormat(rawMsg):
+    if "CQ:image" in rawMsg:
+        cqcode = re.findall('\[CQ:image.*?]', rawMsg)
         for code in cqcode:
             imageurl = re.findall('(?<=.image,url=).*?(?=,subType=)', code)
             imageurl = ' '.join(imageurl)
             renew = '[图片 ' + imageurl + ']'
-            msg = msg.replace(code, renew)
+            msg = rawMsg.replace(code, renew)
         else:
-            cqcode = re.findall('\[CQ:image.*?]', msg)
+            cqcode = re.findall('\[CQ:image.*?]', rawMsg)
             for code in cqcode:
-                msg = msg.replace(code, '[图片]')
+                msg = rawMsg.replace(code, '[图片]')
         msg = msg
-    elif "CQ:record" in msg:
+    elif "CQ:record" in rawMsg:
         msg = "[语音]"
-    elif "CQ:share" in msg:
+    elif "CQ:share" in rawMsg:
         msg = "[链接]"
-    elif "CQ:music" in msg:
+    elif "CQ:music" in rawMsg:
         msg = "[音乐分享]"
-    elif "CQ:redbag" in msg:
+    elif "CQ:redbag" in rawMsg:
         msg = "[红包]"
-    elif "CQ:forward" in msg:
+    elif "CQ:forward" in rawMsg:
         msg = "[合并转发]"
-    elif "CQ:video" in msg:
+    elif "CQ:video" in rawMsg:
         msg = "[视频]"
-    elif "CQ:reply" in msg:
-        cqcode = re.findall('\[CQ:reply.*?]', msg)
+    elif "CQ:reply" in rawMsg:
+        cqcode = re.findall('\[CQ:reply.*?]', rawMsg)
         replymsg = re.findall('(?<=\[CQ:reply,text=).*?(?=,qq=)', cqcode)
         replyid = re.findall('(?<=\,qq=).*?(?=,time=)', cqcode)
         replymsg = ' '.join(replymsg)
         replyid = ' '.join(replyid)
         renew = '回复 ' + ' ' + replyid + '%0A'
-        msg = msg.replace(code, renew)
-        msg = msg
-    elif "戳一戳" in msg:
+        msg = rawMsg.replace(code, renew)
+    elif "戳一戳" in rawMsg:
         msg = "戳了你一下"
-    elif "CQ:at" in msg:
-        atid = re.findall('(?<=qq=).*?(?=])', msg)
+    elif "CQ:at" in rawMsg:
+        atid = re.findall('(?<=qq=).*?(?=])', rawMsg)
         for uid in atid:
             atimfurl = 'http://localhost:5700/get_group_member_info?group_id' + str(groupId) + "?user_id=" + str(uid)
             imf = json.loads(requests.get(atimfurl).content)
             regex1 = re.compile(r'\[CQ:at,qq=' + uid + ']')
-            cqcode = regex1.search(msg)
+            cqcode = regex1.search(rawMsg)
             cqcode = (cqcode.group())
             if imf["data"]["card"] != "":
                 at = "@" + imf["data"]["card"] + " "
             else:
                 at = "@" + imf["data"]["nickname"] + " "
-            msg = msg.replace(cqcode, at)
-    elif 'com.tencent.miniapp' in msg:
-        minijson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', msg))
+            msg = rawMsg.replace(cqcode, at)
+    elif 'com.tencent.miniapp' in rawMsg:
+        minijson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg))
         mini_title = minijson["prompt"]
-        if "detail_1" in msg:
+        if "detail_1" in rawMsg:
             mini_url = urllib.parse.quote(minijson["meta"]["detail_1"]["qqdocurl"])
             mini_desc = minijson["meta"]["detail_1"]["desc"]
         else:
             mini_url = ""
             mini_desc = ""
             msg = mini_title + "%0A" + mini_desc
-    elif "com.tencent.structmsg" in msg:
-        structjson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', msg))
+    elif "com.tencent.structmsg" in rawMsg:
+        structjson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg))
         structtitle = structjson["prompt"]
         msg = structtitle
     else:
-        msg = msg
+        msg = rawMsg
     return msg
 
 def getGroupName(groupId):
@@ -120,7 +119,8 @@ async def recvMsg():
 
     elif json_data["message_type"] == "private":
         nickName = json_data["sender"]["nickname"]
-        msg = msgFormat(msg)
+        rawMsg = json_data["message"]
+        msg = msgFormat(rawMsg)
         print("来自%s的私聊消息:%s"%(nickName,msg))
         if MiPush == "True":
             await httpx.AsyncClient().post("https://tdtt.top/send",data={'title':nickName,'content':msg,'alias':KEY})
@@ -130,7 +130,7 @@ async def recvMsg():
         groupId = json_data["group_id"]
         groupName = getGroupName(groupId)
         nickName = json_data["sender"]["nickname"]
-        msg = msgFormat(msg)
+        msg = msgFormat(rawMsg)
         if groupId in group_whitelist:
             print("群聊%s的消息:%s:%s"%(groupName,nickName,msg))
             if MiPush == "True":
