@@ -5,7 +5,7 @@
 4.预计加入通知栏回复功能  
 完整配置教程：https://my.toho.red/archives/8/
 
-4.5更新：本程序将逐步向docker转移，本仓库将同步更新，docker版请移步https://github.com/zhishixiang/tencent-push4docker查看
+4.5更新：本程序将逐步向docker转移，本仓库将同步更新，docker版请移步https://github.com/zhishixiang/tencent-push4docker查看  
 本项目的后续计划：https://my.toho.red/archives/57/
 
 2022.5.1我想说的话：
