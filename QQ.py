@@ -28,70 +28,70 @@ except:
 
 app = Flask(__name__)
 
-def msgFormat(rawMsg):
-    if "CQ:image" in rawMsg:
-        cqcode = re.findall('\[CQ:image.*?]', rawMsg)
+def msgFormat(rawMsg1):
+    if "CQ:image" in rawMsg1:
+        cqcode = re.findall('\[CQ:image.*?]', rawMsg1)
         for code in cqcode:
             imageurl = re.findall('(?<=.image,url=).*?(?=,subType=)', code)
             imageurl = ' '.join(imageurl)
             renew = '[图片 ' + imageurl + ']'
-            msg = rawMsg.replace(code, renew)
+            msg = rawMsg1.replace(code, renew)
         else:
-            cqcode = re.findall('\[CQ:image.*?]', rawMsg)
+            cqcode = re.findall('\[CQ:image.*?]', rawMsg1)
             for code in cqcode:
-                msg = rawMsg.replace(code, '[图片]')
+                msg = rawMsg1.replace(code, '[图片]')
         msg = msg
-    elif "CQ:record" in rawMsg:
+    elif "CQ:record" in rawMsg1:
         msg = "[语音]"
-    elif "CQ:share" in rawMsg:
+    elif "CQ:share" in rawMsg1:
         msg = "[链接]"
-    elif "CQ:music" in rawMsg:
+    elif "CQ:music" in rawMsg1:
         msg = "[音乐分享]"
-    elif "CQ:redbag" in rawMsg:
+    elif "CQ:redbag" in rawMsg1:
         msg = "[红包]"
-    elif "CQ:forward" in rawMsg:
+    elif "CQ:forward" in rawMsg1:
         msg = "[合并转发]"
-    elif "CQ:video" in rawMsg:
+    elif "CQ:video" in rawMsg1:
         msg = "[视频]"
-    elif "CQ:reply" in rawMsg:
-        cqcode = re.findall('\[CQ:reply.*?]', rawMsg)
+    elif "CQ:reply" in rawMsg1:
+        cqcode = re.findall('\[CQ:reply.*?]', rawMsg1)
         replymsg = re.findall('(?<=\[CQ:reply,text=).*?(?=,qq=)', cqcode)
         replyid = re.findall('(?<=\,qq=).*?(?=,time=)', cqcode)
         replymsg = ' '.join(replymsg)
         replyid = ' '.join(replyid)
         renew = '回复 ' + ' ' + replyid + '%0A'
-        msg = rawMsg.replace(code, renew)
-    elif "戳一戳" in rawMsg:
+        msg = rawMsg1.replace(code, renew)
+    elif "戳一戳" in rawMsg1:
         msg = "戳了你一下"
-    elif "CQ:at" in rawMsg:
-        atid = re.findall('(?<=qq=).*?(?=])', rawMsg)
+    elif "CQ:at" in rawMsg1:
+        atid = re.findall('(?<=qq=).*?(?=])', rawMsg1)
         for uid in atid:
             atimfurl = 'http://localhost:5700/get_group_member_info?group_id' + str(groupId) + "?user_id=" + str(uid)
             imf = json.loads(requests.get(atimfurl).content)
             regex1 = re.compile(r'\[CQ:at,qq=' + uid + ']')
-            cqcode = regex1.search(rawMsg)
+            cqcode = regex1.search(rawMsg1)
             cqcode = (cqcode.group())
             if imf["data"]["card"] != "":
                 at = "@" + imf["data"]["card"] + " "
             else:
                 at = "@" + imf["data"]["nickname"] + " "
-            msg = rawMsg.replace(cqcode, at)
-    elif 'com.tencent.miniapp' in rawMsg:
-        minijson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg))
+            msg = rawMsg1.replace(cqcode, at)
+    elif 'com.tencent.miniapp' in rawMsg1:
+        minijson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg1))
         mini_title = minijson["prompt"]
-        if "detail_1" in rawMsg:
+        if "detail_1" in rawMsg1:
             mini_url = urllib.parse.quote(minijson["meta"]["detail_1"]["qqdocurl"])
             mini_desc = minijson["meta"]["detail_1"]["desc"]
         else:
             mini_url = ""
             mini_desc = ""
             msg = mini_title + "%0A" + mini_desc
-    elif "com.tencent.structmsg" in rawMsg:
-        structjson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg))
+    elif "com.tencent.structmsg" in rawMsg1:
+        structjson = json.loads(re.findall('(?<=\[CQ:json,data=).*?(?=])', rawMsg1))
         structtitle = structjson["prompt"]
         msg = structtitle
     else:
-        msg = rawMsg
+        msg = rawMsg1
     return msg
 
 def getGroupName(groupId):
