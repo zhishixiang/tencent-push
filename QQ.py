@@ -130,6 +130,7 @@ async def recvMsg():
         groupId = json_data["group_id"]
         groupName = getGroupName(groupId)
         nickName = json_data["sender"]["nickname"]
+        rawMsg = json_data["message"]
         msg = msgFormat(rawMsg)
         if groupId in group_whitelist:
             print("群聊%s的消息:%s:%s"%(groupName,nickName,msg))
